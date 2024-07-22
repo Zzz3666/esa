@@ -13,7 +13,7 @@ st.write('Normal work value', normal_work_value)
 st.write('Protect value', protect_value )
 st.write('Protect value sin', protect_value_sin )
 
-sin_frequency = st.slider('Select a sin rfrequency[Hz]', 1, 10, 5, 1)
+sin_frequency = st.slider('Select a sin rfrequency[Hz]', 1, 10, 1, 1)
 base_frequency = st.slider('Select a base frequency[kHz]', 1, 10, 1, 1)
 
 x = np.linspace(0, 2 * np.pi * sin_frequency, base_frequency * 1000)
@@ -32,6 +32,19 @@ wave_work_protect_line = np.linspace(protect_value_sin,
                                        protect_value_sin, 
                                        base_frequency * 1000)
 y = np.sin(x) * normal_work_value * (sin_max_amplitude/2) + normal_work_value
+
+y = np.round(y)
+
+sin_data = str(y.tolist())
+sin_data = sin_data.replace('.0', '')
+sin_data = sin_data.replace('[', '{')
+sin_data = sin_data.replace(']', '}')
+
+with open('./template/c/sin_wave_generate.c', 'r') as template_file:
+    template_file_data = template_file.read()
+
+template_file.close()
+
 chart_data = pd.DataFrame({'Wave Work':y,
                            'Normal Work':line_work_line, 
                            'Sin Max':line_sin_max, 
@@ -39,3 +52,5 @@ chart_data = pd.DataFrame({'Wave Work':y,
                            'Normal work protect value':normal_work_protect_line,
                            'Wave work protect value':wave_work_protect_line})
 st.line_chart(chart_data)
+
+st.code(template_file_data.replace('"replace_sin_wave_data"', sin_data))
